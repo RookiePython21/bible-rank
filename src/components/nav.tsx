@@ -1,10 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 sm:px-6">
-        <Link href="/" className="text-lg font-bold tracking-tight text-slate-900">
+        <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-900">
+          <Image src="/bible_rank_logo.png" alt="" width={32} height={32} className="h-8 w-8" priority />
           Bible<span className="text-indigo-600">Rank</span>
         </Link>
 

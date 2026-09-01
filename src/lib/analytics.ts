@@ -12,7 +12,8 @@ export type AnalyticsEvent =
   | "stripe_checkout_created"
   | "contribution_completed"
   | "share_clicked"
-  | "leaderboard_row_click";
+  | "leaderboard_row_click"
+  | "interpretation_submitted";
 
 export function track(event: AnalyticsEvent, properties: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;

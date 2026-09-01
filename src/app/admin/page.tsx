@@ -1,10 +1,12 @@
 import { revalidatePath } from "next/cache";
 import {
   getAdminContributions,
+  getAdminInterpretations,
   getWebhookFailures,
   getRecentSearchEvents,
   getReconciliationDrift,
   setContributionHidden,
+  setInterpretationHidden,
   getVerseTotalsSummary,
 } from "@/lib/admin";
 import { formatUSD } from "@/lib/money";
@@ -27,6 +29,20 @@ async function unhideAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
+async function hideInterpretationAction(formData: FormData) {
+  "use server";
+  const id = String(formData.get("id"));
+  await setInterpretationHidden(id, true);
+  revalidatePath("/admin");
+}
+
+async function unhideInterpretationAction(formData: FormData) {
+  "use server";
+  const id = String(formData.get("id"));
+  await setInterpretationHidden(id, false);
+  revalidatePath("/admin");
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
@@ -34,8 +50,9 @@ export default async function AdminPage({
 }) {
   const { q } = await searchParams;
 
-  const [contributions, failures, searches, drift, summary] = await Promise.all([
+  const [contributions, interpretations, failures, searches, drift, summary] = await Promise.all([
     getAdminContributions(q),
+    getAdminInterpretations(),
     getWebhookFailures(),
     getRecentSearchEvents(),
     getReconciliationDrift(),
@@ -126,6 +143,44 @@ export default async function AdminPage({
                   ) : (
                     <form action={hideAction}>
                       <input type="hidden" name="id" value={c.id} />
+                      <button className="text-xs font-semibold text-slate-500">Hide</button>
+                    </form>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-bold text-slate-900">Interpretations</h2>
+        <table className="mt-4 w-full text-left text-sm">
+          <thead className="text-slate-400">
+            <tr>
+              <th className="py-2">Verse</th>
+              <th>Interpretation</th>
+              <th>Author</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {interpretations.map((it) => (
+              <tr key={it.id} className="border-t border-slate-100 align-top">
+                <td className="py-2">{it.verse ? reference(it.verse) : "—"}</td>
+                <td className="max-w-[320px] truncate">{it.body}</td>
+                <td>{it.author_name?.trim() || "Anonymous"}</td>
+                <td>{new Date(it.created_at).toLocaleString()}</td>
+                <td>
+                  {it.hidden ? (
+                    <form action={unhideInterpretationAction}>
+                      <input type="hidden" name="id" value={it.id} />
+                      <button className="text-xs font-semibold text-indigo-600">Unhide</button>
+                    </form>
+                  ) : (
+                    <form action={hideInterpretationAction}>
+                      <input type="hidden" name="id" value={it.id} />
                       <button className="text-xs font-semibold text-slate-500">Hide</button>
                     </form>
                   )}

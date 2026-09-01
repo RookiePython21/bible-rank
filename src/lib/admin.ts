@@ -1,6 +1,6 @@
 import "server-only";
 import { supabaseAdmin } from "./supabase/admin";
-import type { ContributionRow, VerseRow } from "@/types/db";
+import type { ContributionRow, InterpretationRow, VerseRow } from "@/types/db";
 
 export async function getAdminContributions(
   query?: string,
@@ -62,6 +62,26 @@ export async function setContributionHidden(contributionId: string, hidden: bool
     .from("contributions")
     .update({ hidden_from_activity: hidden })
     .eq("id", contributionId);
+  if (error) throw new Error(error.message);
+}
+
+export async function getAdminInterpretations(
+  limit = 50
+): Promise<(InterpretationRow & { verse: VerseRow | null })[]> {
+  const { data, error } = await supabaseAdmin()
+    .from("interpretations")
+    .select("*, verse:verses(*)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as (InterpretationRow & { verse: VerseRow | null })[];
+}
+
+export async function setInterpretationHidden(interpretationId: string, hidden: boolean) {
+  const { error } = await supabaseAdmin()
+    .from("interpretations")
+    .update({ hidden })
+    .eq("id", interpretationId);
   if (error) throw new Error(error.message);
 }
 

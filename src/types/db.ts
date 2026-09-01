@@ -71,6 +71,15 @@ export type ContributionRow = {
   created_at: string;
 };
 
+export type InterpretationRow = {
+  id: string;
+  verse_id: string;
+  author_name: string | null;
+  body: string;
+  hidden: boolean;
+  created_at: string;
+};
+
 export type SiteStats = {
   totalVisitors: number;
   launchedAt: string;
