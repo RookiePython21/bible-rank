@@ -24,6 +24,7 @@ export type LeaderboardRow = {
   verse_text: string;
   total_contributed_cents: number;
   click_count: number;
+  interpretation_count: number;
   last_contribution_at: string;
   total_count: number;
 };
@@ -40,6 +41,7 @@ export type TodayLeaderboardRow = {
   today_total_cents: number;
   total_contributed_cents: number;
   click_count: number;
+  interpretation_count: number;
   last_contribution_at: string;
   total_count: number;
 };

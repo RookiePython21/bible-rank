@@ -15,6 +15,7 @@ type Props = {
   text: string;
   totalCents: number;
   clickCount: number;
+  interpretationCount: number;
   lastContributionAt: string;
   claimPriceCents: number;
   sectionLabel?: string;
@@ -32,6 +33,7 @@ export function LeaderboardRow({
   text,
   totalCents,
   clickCount,
+  interpretationCount,
   lastContributionAt,
   claimPriceCents,
   sectionLabel,
@@ -60,6 +62,15 @@ export function LeaderboardRow({
       <span>
         {clickCount.toLocaleString()} {clickCount === 1 ? "click" : "clicks"}
       </span>
+      {interpretationCount > 0 && (
+        <>
+          <span aria-hidden>·</span>
+          <span>
+            {interpretationCount.toLocaleString()}{" "}
+            {interpretationCount === 1 ? "interpretation" : "interpretations"}
+          </span>
+        </>
+      )}
     </p>
   );
 
