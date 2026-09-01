@@ -24,7 +24,8 @@ export default function HowItWorksPage() {
           <p className="font-semibold text-slate-900">2. Contribute to it</p>
           <p className="mt-1 text-slate-600">
             Every verse has a single public total. Contribute any whole-dollar amount ($1
-            minimum) to increase it. Payment is handled securely by Stripe.
+            minimum) to increase it. Payment is handled securely by Stripe. Contributing to a
+            verse also unlocks sharing your own interpretation of it.
           </p>
         </li>
         <li>

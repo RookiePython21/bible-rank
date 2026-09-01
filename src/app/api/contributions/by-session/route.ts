@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
+import { UNLOCK_COOKIE_NAME, unlockCookieOptions, unlockCookieValue } from "@/lib/interpretation-unlock";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -19,5 +21,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Lookup failed." }, { status: 500 });
   }
 
-  return NextResponse.json({ contribution: data ?? null });
+  const response = NextResponse.json({ contribution: data ?? null });
+
+  if (data?.verse_id) {
+    const existing = (await cookies()).get(UNLOCK_COOKIE_NAME)?.value;
+    response.cookies.set(UNLOCK_COOKIE_NAME, unlockCookieValue(existing, data.verse_id), unlockCookieOptions);
+  }
+
+  return response;
 }

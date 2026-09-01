@@ -4,9 +4,9 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@/lib/analytics";
 
-type Props = { verseId: string };
+type Props = { verseId: string; unlocked: boolean };
 
-export function InterpretationForm({ verseId }: Props) {
+export function InterpretationForm({ verseId, unlocked }: Props) {
   const router = useRouter();
   const [authorName, setAuthorName] = useState("");
   const [body, setBody] = useState("");
@@ -45,6 +45,17 @@ export function InterpretationForm({ verseId }: Props) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!unlocked) {
+    return (
+      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+        Contribute to this verse to share your interpretation.{" "}
+        <a href="#contribute" className="font-medium text-indigo-600 hover:text-indigo-700">
+          Contribute now
+        </a>
+      </div>
+    );
   }
 
   return (

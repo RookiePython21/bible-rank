@@ -80,6 +80,13 @@ export function PaymentStatus({ sessionId }: { sessionId: string }) {
           {ref} moved from #{contribution.rank_before} → #{contribution.rank_after}
         </p>
       )}
+      <p className="mt-1 text-sm text-slate-500">
+        You can now{" "}
+        <Link href={`${href}#interpretations`} className="font-medium text-indigo-600 hover:text-indigo-700">
+          share your interpretation
+        </Link>{" "}
+        of {ref}.
+      </p>
 
       <BoostShareCard
         verseId={contribution.verse.id}

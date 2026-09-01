@@ -104,6 +104,7 @@ export function LeaderboardRow({
 
           <div className="shrink-0 text-right">
             <p className="text-lg font-extrabold text-amber-700 sm:text-2xl">{formatUSD(totalCents)}</p>
+            <p className="text-xs text-slate-400">contributed</p>
           </div>
         </div>
       </div>

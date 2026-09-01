@@ -7,6 +7,7 @@ import {
   getRecentContributionsForVerse,
 } from "@/lib/verses";
 import { getInterpretationsForVerse } from "@/lib/interpretations";
+import { hasUnlockedInterpretation } from "@/lib/interpretation-unlock";
 import { formatUSD, requiredToTakeFirstCents, centsToDollars } from "@/lib/money";
 import { ContributeWidget } from "@/components/contribute-widget";
 import { InterpretationForm } from "@/components/interpretation-form";
@@ -55,11 +56,12 @@ export default async function VersePage({
   const row = await loadVerse(p);
   if (!row) notFound();
 
-  const [rank, topTotalCents, recent, interpretations] = await Promise.all([
+  const [rank, topTotalCents, recent, interpretations, unlocked] = await Promise.all([
     getVerseRank(row.id),
     getTopTotalCents(),
     getRecentContributionsForVerse(row.id, 5),
     getInterpretationsForVerse(row.id, 20),
+    hasUnlockedInterpretation(row.id),
   ]);
 
   const ref = reference(row);
@@ -101,7 +103,7 @@ export default async function VersePage({
         )}
       </div>
 
-      <div className="mt-8">
+      <div id="contribute" className="mt-8">
         <ContributeWidget
           verseId={row.id}
           currentTotalCents={row.total_contributed_cents}
@@ -124,13 +126,13 @@ export default async function VersePage({
         </div>
       )}
 
-      <div className="mt-10">
+      <div id="interpretations" className="mt-10">
         <h2 className="text-sm font-semibold text-slate-900">Interpretations</h2>
         <p className="mt-1 text-sm text-slate-500">
           What this verse means to people who&apos;ve read it.
         </p>
 
-        <InterpretationForm verseId={row.id} />
+        <InterpretationForm verseId={row.id} unlocked={unlocked} />
 
         {interpretations.length === 0 ? (
           <p className="mt-4 text-sm text-slate-400">

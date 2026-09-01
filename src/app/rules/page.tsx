@@ -43,6 +43,10 @@ export default function RulesPage() {
       <ul className="mt-3 space-y-3 text-slate-600">
         <li>Your contribution is public and immediately reflected on the leaderboard.</li>
         <li>A completed payment is what claims the rank.</li>
+        <li>
+          Contributing to a verse also unlocks sharing your interpretation of that verse — a
+          small barrier to keep interpretations meaningful.
+        </li>
       </ul>
     </div>
   );

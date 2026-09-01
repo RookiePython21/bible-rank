@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createInterpretation } from "@/lib/interpretations";
 import { getVerseById } from "@/lib/verses";
 import { isRateLimited, clientIp } from "@/lib/rate-limit";
+import { hasUnlockedInterpretation } from "@/lib/interpretation-unlock";
 
 const bodySchema = z.object({
   verseId: z.string().uuid(),
@@ -39,6 +40,13 @@ export async function POST(req: Request) {
   const verse = await getVerseById(parsed.data.verseId);
   if (!verse) {
     return NextResponse.json({ error: "Verse not found." }, { status: 404 });
+  }
+
+  if (!(await hasUnlockedInterpretation(parsed.data.verseId))) {
+    return NextResponse.json(
+      { error: "Contribute to this verse before sharing your interpretation." },
+      { status: 403 }
+    );
   }
 
   const body = stripControlChars(parsed.data.body);
