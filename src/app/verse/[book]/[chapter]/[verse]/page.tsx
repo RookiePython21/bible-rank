@@ -115,6 +115,11 @@ export default async function VersePage({
         </div>
       )}
 
+      <div className="mt-8">
+        <h2 className="text-sm font-semibold text-slate-900">Add your interpretation</h2>
+        <InterpretationForm verseId={row.id} unlocked={unlocked} />
+      </div>
+
       <div id="contribute" className="mt-8">
         <ContributeWidget
           verseId={row.id}
@@ -143,8 +148,6 @@ export default async function VersePage({
         <p className="mt-1 text-sm text-slate-500">
           What this verse means to people who&apos;ve read it.
         </p>
-
-        <InterpretationForm verseId={row.id} unlocked={unlocked} />
 
         {interpretations.length === 0 ? (
           <p className="mt-4 text-sm text-slate-400">

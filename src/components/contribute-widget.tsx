@@ -90,7 +90,7 @@ export function ContributeWidget({
               : "border-amber-300 text-amber-700 hover:border-amber-500"
           }`}
         >
-          {isCurrentlyFirst ? `Extend Lead ${formatUSD(takeFirstDollars * 100)}` : `Take #1 for ${formatUSD(takeFirstDollars * 100)}`}
+          {isCurrentlyFirst ? `Extend Lead ${formatUSD(takeFirstDollars * 100)}` : `Boost to top for ${formatUSD(takeFirstDollars * 100)}`}
         </button>
       </div>
 

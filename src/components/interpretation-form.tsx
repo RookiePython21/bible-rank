@@ -50,7 +50,7 @@ export function InterpretationForm({ verseId, unlocked }: Props) {
   if (!unlocked) {
     return (
       <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-        Contribute to this verse to share your interpretation.{" "}
+        Contribute to show your interpretation.{" "}
         <a href="#contribute" className="font-medium text-indigo-600 hover:text-indigo-700">
           Contribute now
         </a>

@@ -36,6 +36,7 @@ function VerseCard({
       style={{
         display: "flex",
         flexDirection: "column",
+        width: "100%",
         borderRadius: 24,
         padding: "28px 32px",
         background: highlighted ? "rgba(250,204,21,0.16)" : "rgba(255,255,255,0.08)",
@@ -102,7 +103,7 @@ export async function GET(req: Request) {
           flexDirection: "column",
           width: "100%",
           height: "100%",
-          background: "radial-gradient(circle at 20% 15%, #6366f1 0%, #312e81 45%, #1e1b4b 100%)",
+          background: "radial-gradient(circle at 20% 15%, #16a34a 0%, #14532d 45%, #052e16 100%)",
           fontFamily: "sans-serif",
           position: "relative",
           padding: "88px 80px",
@@ -130,7 +131,7 @@ export async function GET(req: Request) {
           {headline}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 48 }}>
+        <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: 24, marginTop: 48 }}>
           {variant === "open" ? (
             <>
               <VerseCard reference={duel.verseA.reference} text={duel.verseA.text} />

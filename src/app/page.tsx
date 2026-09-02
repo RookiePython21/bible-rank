@@ -94,7 +94,9 @@ export default async function HomePage({
         {duel && (
           <Link
             href="/duel"
-            className="mt-8 flex items-center justify-between rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 transition hover:border-indigo-400"
+            className={`mt-8 flex items-center justify-between rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 transition hover:border-indigo-400 ${
+              duel.status === "resolved" ? "" : "animate-duel-pulse"
+            }`}
           >
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">
