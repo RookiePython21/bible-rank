@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { parseVerseSlug } from "@/lib/verse-slug";
 import { getVerseByReference, getVerseRank, getTopTotalCents } from "@/lib/verses";
+import { hasUnlockedInterpretation } from "@/lib/interpretation-unlock";
 import { formatUSD, requiredToTakeFirstCents, centsToDollars } from "@/lib/money";
 import { ContributeWidget } from "@/components/contribute-widget";
+import { InterpretationForm } from "@/components/interpretation-form";
 import { reference } from "@/types/db";
 
 export const metadata: Metadata = {
@@ -30,9 +32,10 @@ export default async function CheckoutPage({
   const row = await getVerseByReference(parsed.bookSlug, parsed.chapter, parsed.verse);
   if (!row) notFound();
 
-  const [rank, topTotalCents] = await Promise.all([
+  const [rank, topTotalCents, unlocked] = await Promise.all([
     getVerseRank(row.id),
     getTopTotalCents(),
+    hasUnlockedInterpretation(row.id),
   ]);
 
   const ref = reference(row);
@@ -59,6 +62,13 @@ export default async function CheckoutPage({
             <span className="font-medium text-amber-700">{formatUSD(takeFirstCents)}</span>
           </div>
         )}
+      </div>
+
+      <div className="mt-6">
+        <h2 className="text-sm font-semibold text-slate-900">
+          What do you want to share with others about this post?
+        </h2>
+        <InterpretationForm verseId={row.id} unlocked={unlocked} />
       </div>
 
       <div id="contribute" className="mt-6">
