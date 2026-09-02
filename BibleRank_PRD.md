@@ -1440,7 +1440,7 @@ Response:
       "reference": "Joshua 1:9",
       "text": "...",
       "rank": 61,
-      "totalContributedCents": 13300,
+      "totalcontributedCents": 13300,
       "score": 0.87
     }
   ]
@@ -1468,7 +1468,7 @@ Response:
   "reference": "John 3:16",
   "text": "...",
   "rank": 4,
-  "totalContributedCents": 50000
+  "totalcontributedCents": 50000
 }
 ```
 

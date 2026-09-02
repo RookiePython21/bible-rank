@@ -61,7 +61,7 @@ export default async function CheckoutPage({
         )}
       </div>
 
-      <div className="mt-6">
+      <div id="contribute" className="mt-6">
         <ContributeWidget
           verseId={row.id}
           currentTotalCents={row.total_contributed_cents}

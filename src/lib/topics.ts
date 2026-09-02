@@ -6,6 +6,7 @@ export type TopicVerseRef = { bookSlug: string; chapter: number; verse: number }
 
 export type Topic = {
   label: string;
+  emoji: string;
   refs: TopicVerseRef[];
 };
 
@@ -16,6 +17,7 @@ function ref(bookSlug: string, chapter: number, verse: number): TopicVerseRef {
 export const TOPICS: Record<string, Topic> = {
   anxiety: {
     label: "Anxiety",
+    emoji: "😟",
     refs: [
       ref("philippians", 4, 6),
       ref("philippians", 4, 7),
@@ -29,6 +31,7 @@ export const TOPICS: Record<string, Topic> = {
   },
   love: {
     label: "Love",
+    emoji: "❤️",
     refs: [
       ref("john", 3, 16),
       ref("1-corinthians", 13, 4),
@@ -42,6 +45,7 @@ export const TOPICS: Record<string, Topic> = {
   },
   forgiveness: {
     label: "Forgiveness",
+    emoji: "🤲",
     refs: [
       ref("ephesians", 4, 32),
       ref("colossians", 3, 13),
@@ -54,6 +58,7 @@ export const TOPICS: Record<string, Topic> = {
   },
   hope: {
     label: "Hope",
+    emoji: "🌅",
     refs: [
       ref("jeremiah", 29, 11),
       ref("romans", 15, 13),
@@ -66,6 +71,7 @@ export const TOPICS: Record<string, Topic> = {
   },
   strength: {
     label: "Strength",
+    emoji: "💪",
     refs: [
       ref("philippians", 4, 13),
       ref("isaiah", 40, 31),
@@ -79,6 +85,7 @@ export const TOPICS: Record<string, Topic> = {
   },
   faith: {
     label: "Faith",
+    emoji: "🙏",
     refs: [
       ref("hebrews", 11, 1),
       ref("romans", 10, 17),
@@ -91,6 +98,7 @@ export const TOPICS: Record<string, Topic> = {
   },
   peace: {
     label: "Peace",
+    emoji: "🕊️",
     refs: [
       ref("john", 14, 27),
       ref("philippians", 4, 7),
@@ -103,6 +111,7 @@ export const TOPICS: Record<string, Topic> = {
   },
   grief: {
     label: "Grief",
+    emoji: "💔",
     refs: [
       ref("psalms", 34, 18),
       ref("matthew", 5, 4),

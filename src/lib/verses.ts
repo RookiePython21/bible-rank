@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { supabaseServer } from "./supabase/server";
 import { supabaseAdmin } from "./supabase/admin";
+import { TOPICS } from "./topics";
 import type {
   VerseRow,
   LeaderboardRow,
@@ -63,6 +64,61 @@ export async function getLeaderboardTodayPage(opts: {
   const totalCount = rows[0]?.total_count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   return { rows, totalCount, totalPages };
+}
+
+export async function getLeaderboardByVerseIds(verseIds: string[], limit = 10): Promise<LeaderboardRow[]> {
+  if (verseIds.length === 0) return [];
+  const { data, error } = await supabaseServer().rpc("get_leaderboard_by_ids", {
+    p_verse_ids: verseIds,
+    p_limit: limit,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as LeaderboardRow[];
+}
+
+export async function getLeaderboardTodayByVerseIds(
+  verseIds: string[],
+  limit = 10
+): Promise<TodayLeaderboardRow[]> {
+  if (verseIds.length === 0) return [];
+  const { data, error } = await supabaseServer().rpc("get_leaderboard_today_by_ids", {
+    p_verse_ids: verseIds,
+    p_limit: limit,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as TodayLeaderboardRow[];
+}
+
+/**
+ * Leaderboard filtered to a curated emotion/topic's verses (see src/lib/topics.ts).
+ * Ranks are the verses' true sitewide rank, not a position local to the topic. When
+ * none of the topic's verses have been boosted, falls back to the unfiltered top list.
+ */
+export async function getTopicLeaderboard(
+  topicSlug: string,
+  opts: { today?: boolean; limit?: number } = {}
+): Promise<{
+  rows: LeaderboardRow[] | TodayLeaderboardRow[];
+  isFallback: boolean;
+  topicLabel: string;
+} | null> {
+  const topic = TOPICS[topicSlug];
+  if (!topic) return null;
+  const limit = opts.limit ?? 10;
+
+  const found = await Promise.all(topic.refs.map((r) => getVerseByReference(r.bookSlug, r.chapter, r.verse)));
+  const verseIds = found.filter((v): v is VerseRow => v !== null).map((v) => v.id);
+
+  const rows = opts.today
+    ? await getLeaderboardTodayByVerseIds(verseIds, limit)
+    : await getLeaderboardByVerseIds(verseIds, limit);
+
+  if (rows.length > 0) {
+    return { rows, isFallback: false, topicLabel: topic.label };
+  }
+
+  const fallbackRows = opts.today ? await getLeaderboardToday(limit) : await getLeaderboard(limit);
+  return { rows: fallbackRows, isFallback: true, topicLabel: topic.label };
 }
 
 export async function getSiteStats(): Promise<SiteStats> {

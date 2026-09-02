@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLeaderboardPage, getLeaderboardTodayPage, getTopVerse } from "@/lib/verses";
+import { getLeaderboardPage, getLeaderboardTodayPage, getTopVerse, getTopicLeaderboard } from "@/lib/verses";
 import { getCurrentDuel } from "@/lib/duels";
 import { bookSlugsForSection, SECTION_BY_BOOK_SLUG } from "@/lib/bible-books";
 import { claimPriceCents, formatUSD } from "@/lib/money";
@@ -56,28 +56,88 @@ function normalizeToday(row: TodayLeaderboardRow): NormalizedLeaderboardRow {
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; category?: string; todayPage?: string; todayCategory?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    category?: string;
+    topic?: string;
+    todayPage?: string;
+    todayCategory?: string;
+    todayTopic?: string;
+  }>;
 }) {
-  const { page: pageParam, category, todayPage: todayPageParam, todayCategory } = await searchParams;
+  const {
+    page: pageParam,
+    category,
+    topic,
+    todayPage: todayPageParam,
+    todayCategory,
+    todayTopic,
+  } = await searchParams;
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const todayPage = Math.max(1, parseInt(todayPageParam ?? "1", 10) || 1);
   const bookSlugs = bookSlugsForSection(category) ?? undefined;
   const todayBookSlugs = bookSlugsForSection(todayCategory) ?? undefined;
 
+  async function loadAllTime(): Promise<{
+    rows: LeaderboardRow[];
+    totalCount: number;
+    totalPages: number;
+    notice?: string;
+  }> {
+    if (topic) {
+      const result = await getTopicLeaderboard(topic, { limit: 10 });
+      const rows = (result?.rows ?? []) as LeaderboardRow[];
+      return {
+        rows,
+        totalCount: rows.length,
+        totalPages: 1,
+        notice: result?.isFallback
+          ? `No verses about ${result.topicLabel} have been boosted yet — showing the top 10 overall.`
+          : undefined,
+      };
+    }
+    return getLeaderboardPage({ page, pageSize: PAGE_SIZE, bookSlugs });
+  }
+
+  async function loadToday(): Promise<{
+    rows: TodayLeaderboardRow[];
+    totalCount: number;
+    totalPages: number;
+    notice?: string;
+  }> {
+    if (todayTopic) {
+      const result = await getTopicLeaderboard(todayTopic, { today: true, limit: 10 });
+      const rows = (result?.rows ?? []) as TodayLeaderboardRow[];
+      return {
+        rows,
+        totalCount: rows.length,
+        totalPages: 1,
+        notice: result?.isFallback
+          ? `No verses about ${result.topicLabel} have been boosted today — showing today's top 10 overall.`
+          : undefined,
+      };
+    }
+    return getLeaderboardTodayPage({ page: todayPage, pageSize: PAGE_SIZE, bookSlugs: todayBookSlugs });
+  }
+
   const [allTime, today, topVerse, duel] = await Promise.all([
-    getLeaderboardPage({ page, pageSize: PAGE_SIZE, bookSlugs }),
-    getLeaderboardTodayPage({ page: todayPage, pageSize: PAGE_SIZE, bookSlugs: todayBookSlugs }),
+    loadAllTime(),
+    loadToday(),
     getTopVerse(),
     getCurrentDuel(),
   ]);
+  const allTimeNotice = allTime.notice;
+  const todayNotice = today.notice;
 
   const allTimePreserve: Record<string, string> = {
     ...(todayPage > 1 ? { todayPage: String(todayPage) } : {}),
     ...(todayCategory ? { todayCategory } : {}),
+    ...(todayTopic ? { todayTopic } : {}),
   };
   const todayPreserve: Record<string, string> = {
     ...(page > 1 ? { page: String(page) } : {}),
     ...(category ? { category } : {}),
+    ...(topic ? { topic } : {}),
   };
 
   return (
@@ -108,7 +168,7 @@ export default async function HomePage({
               <p className="mt-0.5 text-xs text-slate-500">Which speaks to you more, and why?</p>
             </div>
             <span className="shrink-0 text-sm font-semibold text-indigo-600">
-              {formatUSD(duel.totalsBySide.a + duel.totalsBySide.b)} raised →
+              {formatUSD(duel.totalsBySide.a + duel.totalsBySide.b)} added →
             </span>
           </Link>
         )}
@@ -123,9 +183,12 @@ export default async function HomePage({
           page={page}
           pageSize={PAGE_SIZE}
           category={category}
+          topic={topic}
+          topicParam="topic"
+          filterNotice={allTimeNotice}
           preserveParams={allTimePreserve}
           emptyMessage={`No verses have been supported ${
-            category ? "in this section " : ""
+            category || topic ? "in this section " : ""
           }yet. Be the first — search for a verse above.`}
         />
 
@@ -137,11 +200,14 @@ export default async function HomePage({
           page={todayPage}
           pageSize={PAGE_SIZE}
           category={todayCategory}
+          topic={todayTopic}
+          topicParam="todayTopic"
+          filterNotice={todayNotice}
           pageParam="todayPage"
           categoryParam="todayCategory"
           preserveParams={todayPreserve}
           emptyMessage={`No verses have been supported ${
-            todayCategory ? "in this section " : ""
+            todayCategory || todayTopic ? "in this section " : ""
           }today yet. Be the first — search for a verse above.`}
         />
       </div>

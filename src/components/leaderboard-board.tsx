@@ -1,7 +1,7 @@
 import { LeaderboardRow } from "@/components/leaderboard-row";
 import { LatestActivityInline } from "@/components/latest-activity-inline";
 import { SectionDivider } from "@/components/section-divider";
-import { CategoryPills } from "@/components/category-pills";
+import { TopicPills } from "@/components/topic-pills";
 import { Pagination } from "@/components/pagination";
 
 export type NormalizedLeaderboardRow = {
@@ -31,6 +31,9 @@ type Props = {
   category?: string;
   pageParam?: string;
   categoryParam?: string;
+  topic?: string;
+  topicParam?: string;
+  filterNotice?: string;
   preserveParams?: Record<string, string>;
   emptyMessage: string;
 };
@@ -45,6 +48,9 @@ export function LeaderboardBoard({
   category,
   pageParam = "page",
   categoryParam = "category",
+  topic,
+  topicParam = "topic",
+  filterNotice,
   preserveParams,
   emptyMessage,
 }: Props) {
@@ -56,8 +62,10 @@ export function LeaderboardBoard({
       <h2 className="text-xl font-extrabold text-slate-900">{title}</h2>
 
       <div className="mt-4">
-        <CategoryPills active={category} categoryParam={categoryParam} preserveParams={preserveParams} />
+        <TopicPills active={topic} topicParam={topicParam} preserveParams={preserveParams} />
       </div>
+
+      {filterNotice && <p className="mt-3 text-xs text-slate-500">{filterNotice}</p>}
 
       <div className="mt-6">
         {rows.length === 0 ? (

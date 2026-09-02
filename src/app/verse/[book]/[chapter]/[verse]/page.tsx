@@ -116,7 +116,9 @@ export default async function VersePage({
       )}
 
       <div className="mt-8">
-        <h2 className="text-sm font-semibold text-slate-900">Add your interpretation</h2>
+        <h2 className="text-sm font-semibold text-slate-900">
+          What do you want to share with others about this post?
+        </h2>
         <InterpretationForm verseId={row.id} unlocked={unlocked} />
       </div>
 

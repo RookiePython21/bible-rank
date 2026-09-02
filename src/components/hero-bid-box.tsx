@@ -10,9 +10,8 @@ import {
   requiredToTakeFirstCents,
 } from "@/lib/money";
 import { track } from "@/lib/analytics";
+import { TOPICS } from "@/lib/topics";
 import { reference, type LeaderboardRow, type VerseDTO } from "@/types/db";
-
-const TOPIC_CHIPS = ["Anxiety", "Love", "Forgiveness", "Hope", "Strength", "Faith", "Peace", "Grief"];
 
 type Props = { topVerse: LeaderboardRow | null };
 
@@ -285,14 +284,14 @@ export function HeroBidBox({ topVerse }: Props) {
       </form>
 
       <div className="mt-3 flex flex-wrap justify-center gap-2">
-        {TOPIC_CHIPS.map((topic) => (
+        {Object.entries(TOPICS).map(([slug, topic]) => (
           <Link
-            key={topic}
-            href={`/search?q=${encodeURIComponent(topic.toLowerCase())}`}
-            onClick={() => track("verse_search", { search_query: topic.toLowerCase() })}
+            key={slug}
+            href={`/search?q=${encodeURIComponent(slug)}`}
+            onClick={() => track("verse_search", { search_query: slug })}
             className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:border-indigo-400 hover:text-indigo-600"
           >
-            {topic}
+            {topic.emoji} {topic.label}
           </Link>
         ))}
       </div>
