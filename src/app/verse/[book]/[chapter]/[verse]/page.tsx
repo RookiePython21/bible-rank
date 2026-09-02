@@ -8,11 +8,13 @@ import {
 } from "@/lib/verses";
 import { getInterpretationsForVerse } from "@/lib/interpretations";
 import { hasUnlockedInterpretation } from "@/lib/interpretation-unlock";
+import { getCurrentDuel } from "@/lib/duels";
 import { formatUSD, requiredToTakeFirstCents, centsToDollars } from "@/lib/money";
 import { ContributeWidget } from "@/components/contribute-widget";
 import { InterpretationForm } from "@/components/interpretation-form";
 import { ShareControls } from "@/components/share-controls";
 import { VerseViewTracker } from "@/components/verse-view-tracker";
+import { DuelWidget } from "@/components/duel-widget";
 import { reference } from "@/types/db";
 
 type Params = { book: string; chapter: string; verse: string };
@@ -56,13 +58,16 @@ export default async function VersePage({
   const row = await loadVerse(p);
   if (!row) notFound();
 
-  const [rank, topTotalCents, recent, interpretations, unlocked] = await Promise.all([
+  const [rank, topTotalCents, recent, interpretations, unlocked, duel] = await Promise.all([
     getVerseRank(row.id),
     getTopTotalCents(),
     getRecentContributionsForVerse(row.id, 5),
     getInterpretationsForVerse(row.id, 20),
     hasUnlockedInterpretation(row.id),
+    getCurrentDuel(),
   ]);
+
+  const isInCurrentDuel = duel && (duel.verseA.id === row.id || duel.verseB.id === row.id);
 
   const ref = reference(row);
   const isFirst = rank === 1;
@@ -102,6 +107,13 @@ export default async function VersePage({
           </p>
         )}
       </div>
+
+      {isInCurrentDuel && (
+        <div className="mt-8">
+          <h2 className="mb-3 text-sm font-semibold text-slate-900">This verse is in this week&apos;s Verse Duel</h2>
+          <DuelWidget duel={duel!} />
+        </div>
+      )}
 
       <div id="contribute" className="mt-8">
         <ContributeWidget

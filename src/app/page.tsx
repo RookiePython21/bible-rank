@@ -1,6 +1,8 @@
-import { getLeaderboardPage, getLeaderboardTodayPage, getTopTotalCents } from "@/lib/verses";
+import Link from "next/link";
+import { getLeaderboardPage, getLeaderboardTodayPage, getTopVerse } from "@/lib/verses";
+import { getCurrentDuel } from "@/lib/duels";
 import { bookSlugsForSection, SECTION_BY_BOOK_SLUG } from "@/lib/bible-books";
-import { claimPriceCents } from "@/lib/money";
+import { claimPriceCents, formatUSD } from "@/lib/money";
 import type { LeaderboardRow, TodayLeaderboardRow } from "@/types/db";
 import { StatsBar } from "@/components/stats-bar";
 import { HeroBidBox } from "@/components/hero-bid-box";
@@ -62,10 +64,11 @@ export default async function HomePage({
   const bookSlugs = bookSlugsForSection(category) ?? undefined;
   const todayBookSlugs = bookSlugsForSection(todayCategory) ?? undefined;
 
-  const [allTime, today, topTotalCents] = await Promise.all([
+  const [allTime, today, topVerse, duel] = await Promise.all([
     getLeaderboardPage({ page, pageSize: PAGE_SIZE, bookSlugs }),
     getLeaderboardTodayPage({ page: todayPage, pageSize: PAGE_SIZE, bookSlugs: todayBookSlugs }),
-    getTopTotalCents(),
+    getTopVerse(),
+    getCurrentDuel(),
   ]);
 
   const allTimePreserve: Record<string, string> = {
@@ -85,8 +88,28 @@ export default async function HomePage({
         </div>
 
         <div className="mt-10">
-          <HeroBidBox topTotalCents={topTotalCents} />
+          <HeroBidBox topVerse={topVerse} />
         </div>
+
+        {duel && (
+          <Link
+            href="/duel"
+            className="mt-8 flex items-center justify-between rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 transition hover:border-indigo-400"
+          >
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">
+                {duel.status === "resolved" ? "This week's Verse Duel — result" : "This week's Verse Duel"}
+              </p>
+              <p className="mt-1 text-sm font-bold text-slate-900">
+                {duel.verseA.reference} vs. {duel.verseB.reference}
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500">Which speaks to you more, and why?</p>
+            </div>
+            <span className="shrink-0 text-sm font-semibold text-indigo-600">
+              {formatUSD(duel.totalsBySide.a + duel.totalsBySide.b)} raised →
+            </span>
+          </Link>
+        )}
       </div>
 
       <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-2">

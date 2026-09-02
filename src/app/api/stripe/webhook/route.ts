@@ -27,7 +27,12 @@ export async function POST(req: Request) {
   try {
     switch (event.type) {
       case "checkout.session.completed": {
-        await handleCheckoutCompleted(event);
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.duel_id) {
+          await handleDuelBackingCompleted(event);
+        } else {
+          await handleCheckoutCompleted(event);
+        }
         break;
       }
       case "charge.refunded": {
@@ -130,6 +135,70 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
   if (error) throw new Error(error.message);
 }
 
+async function handleDuelBackingCompleted(event: Stripe.Event) {
+  const session = event.data.object as Stripe.Checkout.Session;
+
+  if (session.payment_status !== "paid") {
+    return;
+  }
+
+  const duelId = session.metadata?.duel_id;
+  const side = session.metadata?.side;
+  const metadataAmountCents = session.metadata?.amount_cents;
+
+  if (!duelId || (side !== "a" && side !== "b") || !metadataAmountCents) {
+    console.error("checkout.session.completed missing duel metadata", session.id);
+    return;
+  }
+
+  // Never trust the browser or even Checkout metadata alone for money —
+  // reconcile against what Stripe actually collected.
+  const amountFromStripe = session.amount_total;
+  const amountFromMetadata = parseInt(metadataAmountCents, 10);
+  if (amountFromStripe == null || amountFromStripe !== amountFromMetadata) {
+    console.error("checkout.session.completed duel amount mismatch", session.id, {
+      amountFromStripe,
+      amountFromMetadata,
+    });
+    return;
+  }
+
+  if ((session.currency || "usd").toLowerCase() !== "usd") {
+    console.error("checkout.session.completed unexpected currency", session.id, session.currency);
+    return;
+  }
+
+  const admin = supabaseAdmin();
+
+  const { data: duel, error: duelError } = await admin
+    .from("duels")
+    .select("id")
+    .eq("id", duelId)
+    .maybeSingle();
+
+  if (duelError || !duel) {
+    console.error("checkout.session.completed unknown duel_id", session.id, duelId);
+    return;
+  }
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
+
+  const { error } = await admin.rpc("process_duel_backing", {
+    p_duel_id: duelId,
+    p_side: side,
+    p_amount_cents: amountFromStripe,
+    p_why_note: session.metadata?.why_note || null,
+    p_author_name: session.metadata?.author_name || null,
+    p_stripe_checkout_session_id: session.id,
+    p_stripe_payment_intent_id: paymentIntentId ?? null,
+    p_stripe_event_id: event.id,
+    p_completed_at: new Date().toISOString(),
+  });
+
+  if (error) throw new Error(error.message);
+}
+
 async function handleRefund(event: Stripe.Event) {
   const charge = event.data.object as Stripe.Charge;
   const paymentIntentId =
@@ -137,9 +206,20 @@ async function handleRefund(event: Stripe.Event) {
 
   if (!paymentIntentId) return;
 
-  const { error } = await supabaseAdmin().rpc("process_refund", {
+  const admin = supabaseAdmin();
+
+  const { data: refunded, error } = await admin.rpc("process_refund", {
     p_stripe_payment_intent_id: paymentIntentId,
   });
-
   if (error) throw new Error(error.message);
+
+  // process_refund only touches verse contributions. If this payment intent
+  // wasn't one of those, it may be a duel backing instead.
+  const matchedContribution = (refunded ?? [])[0]?.contribution_id;
+  if (!matchedContribution) {
+    const { error: duelRefundError } = await admin.rpc("process_duel_backing_refund", {
+      p_stripe_payment_intent_id: paymentIntentId,
+    });
+    if (duelRefundError) throw new Error(duelRefundError.message);
+  }
 }

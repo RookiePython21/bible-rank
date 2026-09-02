@@ -8,7 +8,11 @@ import {
   setContributionHidden,
   setInterpretationHidden,
   getVerseTotalsSummary,
+  getAdminDuels,
+  getAdminDuelBackings,
+  setDuelBackingHidden,
 } from "@/lib/admin";
+import { resolveDueDuels } from "@/lib/duel-resolution";
 import { formatUSD } from "@/lib/money";
 import { reference } from "@/types/db";
 
@@ -43,6 +47,26 @@ async function unhideInterpretationAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
+async function hideDuelBackingAction(formData: FormData) {
+  "use server";
+  const id = String(formData.get("id"));
+  await setDuelBackingHidden(id, true);
+  revalidatePath("/admin");
+}
+
+async function unhideDuelBackingAction(formData: FormData) {
+  "use server";
+  const id = String(formData.get("id"));
+  await setDuelBackingHidden(id, false);
+  revalidatePath("/admin");
+}
+
+async function resolveDuelsNowAction() {
+  "use server";
+  await resolveDueDuels();
+  revalidatePath("/admin");
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
@@ -50,14 +74,17 @@ export default async function AdminPage({
 }) {
   const { q } = await searchParams;
 
-  const [contributions, interpretations, failures, searches, drift, summary] = await Promise.all([
-    getAdminContributions(q),
-    getAdminInterpretations(),
-    getWebhookFailures(),
-    getRecentSearchEvents(),
-    getReconciliationDrift(),
-    getVerseTotalsSummary(),
-  ]);
+  const [contributions, interpretations, failures, searches, drift, summary, duels, duelBackings] =
+    await Promise.all([
+      getAdminContributions(q),
+      getAdminInterpretations(),
+      getWebhookFailures(),
+      getRecentSearchEvents(),
+      getReconciliationDrift(),
+      getVerseTotalsSummary(),
+      getAdminDuels(),
+      getAdminDuelBackings(),
+    ]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
@@ -181,6 +208,97 @@ export default async function AdminPage({
                   ) : (
                     <form action={hideInterpretationAction}>
                       <input type="hidden" name="id" value={it.id} />
+                      <button className="text-xs font-semibold text-slate-500">Hide</button>
+                    </form>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-slate-900">Weekly Verse Duel</h2>
+          <form action={resolveDuelsNowAction}>
+            <button className="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white">
+              Resolve now
+            </button>
+          </form>
+        </div>
+        <table className="mt-4 w-full text-left text-sm">
+          <thead className="text-slate-400">
+            <tr>
+              <th className="py-2">Verse A</th>
+              <th>Verse B</th>
+              <th>Side A total</th>
+              <th>Side B total</th>
+              <th>More resonant side</th>
+              <th>Status</th>
+              <th>Window closes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {duels.map((d) => {
+              const sideATotal = duelBackings
+                .filter((b) => b.duel_id === d.id && b.side === "a" && b.status === "completed")
+                .reduce((sum, b) => sum + b.amount_cents, 0);
+              const sideBTotal = duelBackings
+                .filter((b) => b.duel_id === d.id && b.side === "b" && b.status === "completed")
+                .reduce((sum, b) => sum + b.amount_cents, 0);
+              return (
+                <tr key={d.id} className="border-t border-slate-100 align-top">
+                  <td className="py-2">{d.verse_a ? reference(d.verse_a) : "—"}</td>
+                  <td>{d.verse_b ? reference(d.verse_b) : "—"}</td>
+                  <td>{formatUSD(sideATotal)}</td>
+                  <td>{formatUSD(sideBTotal)}</td>
+                  <td>
+                    {d.status !== "resolved"
+                      ? "—"
+                      : d.resolved_side === "a"
+                        ? "Side A"
+                        : d.resolved_side === "b"
+                          ? "Side B"
+                          : "Tie"}
+                  </td>
+                  <td>{d.status}</td>
+                  <td>{new Date(d.window_end).toLocaleString()}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        <h3 className="mt-6 text-sm font-bold text-slate-900">Backings</h3>
+        <table className="mt-2 w-full text-left text-sm">
+          <thead className="text-slate-400">
+            <tr>
+              <th className="py-2">Side</th>
+              <th>Amount</th>
+              <th>Why this speaks to me</th>
+              <th>Author</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {duelBackings.map((b) => (
+              <tr key={b.id} className="border-t border-slate-100 align-top">
+                <td className="py-2">Side {b.side.toUpperCase()}</td>
+                <td>{formatUSD(b.amount_cents)}</td>
+                <td className="max-w-[320px] truncate">{b.why_note || "—"}</td>
+                <td>{b.author_name?.trim() || "Anonymous"}</td>
+                <td>{new Date(b.created_at).toLocaleString()}</td>
+                <td>
+                  {b.hidden ? (
+                    <form action={unhideDuelBackingAction}>
+                      <input type="hidden" name="id" value={b.id} />
+                      <button className="text-xs font-semibold text-indigo-600">Unhide</button>
+                    </form>
+                  ) : (
+                    <form action={hideDuelBackingAction}>
+                      <input type="hidden" name="id" value={b.id} />
                       <button className="text-xs font-semibold text-slate-500">Hide</button>
                     </form>
                   )}

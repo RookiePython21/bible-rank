@@ -1,6 +1,6 @@
 import "server-only";
 import { supabaseAdmin } from "./supabase/admin";
-import type { ContributionRow, InterpretationRow, VerseRow } from "@/types/db";
+import type { ContributionRow, InterpretationRow, VerseRow, DuelRow, DuelBackingRow } from "@/types/db";
 
 export async function getAdminContributions(
   query?: string,
@@ -82,6 +82,31 @@ export async function setInterpretationHidden(interpretationId: string, hidden: 
     .from("interpretations")
     .update({ hidden })
     .eq("id", interpretationId);
+  if (error) throw new Error(error.message);
+}
+
+export async function getAdminDuels(
+  limit = 25
+): Promise<(DuelRow & { verse_a: VerseRow | null; verse_b: VerseRow | null })[]> {
+  const { data, error } = await supabaseAdmin()
+    .from("duels")
+    .select("*, verse_a:verses!duels_verse_a_id_fkey(*), verse_b:verses!duels_verse_b_id_fkey(*)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as (DuelRow & { verse_a: VerseRow | null; verse_b: VerseRow | null })[];
+}
+
+export async function getAdminDuelBackings(duelId?: string, limit = 50): Promise<DuelBackingRow[]> {
+  let q = supabaseAdmin().from("duel_backings").select("*").order("created_at", { ascending: false }).limit(limit);
+  if (duelId) q = q.eq("duel_id", duelId);
+  const { data, error } = await q;
+  if (error) throw new Error(error.message);
+  return (data ?? []) as DuelBackingRow[];
+}
+
+export async function setDuelBackingHidden(backingId: string, hidden: boolean) {
+  const { error } = await supabaseAdmin().from("duel_backings").update({ hidden }).eq("id", backingId);
   if (error) throw new Error(error.message);
 }
 

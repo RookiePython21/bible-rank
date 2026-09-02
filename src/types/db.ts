@@ -82,6 +82,54 @@ export type InterpretationRow = {
   created_at: string;
 };
 
+export type DuelRow = {
+  id: string;
+  verse_a_id: string;
+  verse_b_id: string;
+  window_start: string;
+  window_end: string;
+  status: "open" | "resolved";
+  resolved_side: "a" | "b" | null;
+  created_at: string;
+};
+
+export type DuelBackingRow = {
+  id: string;
+  duel_id: string;
+  side: "a" | "b";
+  amount_cents: number;
+  why_note: string | null;
+  author_name: string | null;
+  stripe_checkout_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  stripe_event_id: string | null;
+  status: "pending" | "completed" | "refunded";
+  hidden: boolean;
+  created_at: string;
+};
+
+export type DuelVerseDTO = {
+  id: string;
+  canonicalKey: string;
+  reference: string;
+  bookSlug: string;
+  chapter: number;
+  verse: number;
+  text: string;
+};
+
+export type DuelDTO = {
+  id: string;
+  windowStart: string;
+  windowEnd: string;
+  status: "open" | "resolved";
+  resolvedSide: "a" | "b" | null;
+  verseA: DuelVerseDTO;
+  verseB: DuelVerseDTO;
+  totalsBySide: { a: number; b: number };
+  backerCountsBySide: { a: number; b: number };
+};
+
 export type SiteStats = {
   totalVisitors: number;
   launchedAt: string;

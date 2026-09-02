@@ -4,16 +4,22 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BIBLE_BOOKS, BOOK_SECTIONS } from "@/lib/bible-books";
-import { formatUSD, MIN_CONTRIBUTION_CENTS, TAKE_FIRST_MARGIN_CENTS } from "@/lib/money";
+import {
+  formatUSD,
+  MIN_CONTRIBUTION_CENTS,
+  TAKE_FIRST_MARGIN_CENTS,
+  requiredToTakeFirstCents,
+} from "@/lib/money";
 import { track } from "@/lib/analytics";
-import type { VerseDTO } from "@/types/db";
+import { reference, type LeaderboardRow, type VerseDTO } from "@/types/db";
 
 const TOPIC_CHIPS = ["Anxiety", "Love", "Forgiveness", "Hope", "Strength", "Faith", "Peace", "Grief"];
 
-type Props = { topTotalCents: number };
+type Props = { topVerse: LeaderboardRow | null };
 
-export function HeroBidBox({ topTotalCents }: Props) {
+export function HeroBidBox({ topVerse }: Props) {
   const router = useRouter();
+  const topTotalCents = topVerse?.total_contributed_cents ?? 0;
   const minDollars = Math.ceil(MIN_CONTRIBUTION_CENTS / 100);
   const [amountDollars, setAmountDollars] = useState(
     Math.max(minDollars, Math.round((topTotalCents + TAKE_FIRST_MARGIN_CENTS) / 100))
@@ -69,7 +75,15 @@ export function HeroBidBox({ topTotalCents }: Props) {
       const res = await fetch(`/api/verse?book=${bookSlug}&chapter=${chapter}&verse=${newVerse}`);
       const dto = res.ok ? await res.json() : null;
       setPicked(dto);
-      if (dto) track("verse_selected", { book_slug: bookSlug, chapter, verse: newVerse });
+      if (dto) {
+        track("verse_selected", { book_slug: bookSlug, chapter, verse: newVerse });
+        setAmountDollars(
+          Math.max(
+            minDollars,
+            Math.round(requiredToTakeFirstCents(topTotalCents, dto.totalContributedCents) / 100)
+          )
+        );
+      }
     } finally {
       setPickLoading(false);
     }
@@ -92,24 +106,21 @@ export function HeroBidBox({ topTotalCents }: Props) {
   return (
     <div className="text-center">
       <h1 className="text-4xl font-extrabold tracking-tight text-balance text-slate-900 sm:text-6xl">
-        Claim #1 for{" "}
-        <button
-          type="button"
-          onClick={() => step(-1)}
-          aria-label="Decrease amount"
-          className="mx-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 align-middle text-lg font-bold text-amber-700 transition hover:bg-amber-200"
-        >
-          −
-        </button>
-        <span className="text-amber-600">{formatUSD(amountDollars * 100)}</span>
-        <button
-          type="button"
-          onClick={() => step(1)}
-          aria-label="Increase amount"
-          className="mx-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 align-middle text-lg font-bold text-amber-700 transition hover:bg-amber-200"
-        >
-          +
-        </button>
+        {topVerse ? (
+          <>
+            {reference(topVerse)} holds #1 at{" "}
+            <span className="text-amber-600">{formatUSD(topVerse.total_contributed_cents)}</span>
+            {topVerse.interpretation_count > 0 && (
+              <>
+                {" "}
+                and {topVerse.interpretation_count.toLocaleString()}{" "}
+                {topVerse.interpretation_count === 1 ? "interpretation" : "interpretations"}
+              </>
+            )}
+          </>
+        ) : (
+          "No verse holds #1 yet"
+        )}
       </h1>
 
       <p className="mx-auto mt-4 max-w-xl text-slate-500">
@@ -175,13 +186,36 @@ export function HeroBidBox({ topTotalCents }: Props) {
               {picked.rank ? `Currently #${picked.rank}` : "Currently unranked"} ·{" "}
               {formatUSD(picked.totalContributedCents)} contributed
             </p>
-            <button
-              type="button"
-              onClick={boostPicked}
-              className="mt-3 rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600"
-            >
-              <span aria-hidden>⚡</span> Boost Verse
-            </button>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-white px-1 py-1">
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  aria-label="Decrease amount"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700 transition hover:bg-amber-200"
+                >
+                  −
+                </button>
+                <span className="min-w-[4.5rem] text-center text-sm font-semibold text-amber-700">
+                  {formatUSD(amountDollars * 100)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  aria-label="Increase amount"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700 transition hover:bg-amber-200"
+                >
+                  +
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={boostPicked}
+                className="rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600"
+              >
+                <span aria-hidden>⚡</span> Boost Verse
+              </button>
+            </div>
           </div>
         )}
       </div>
