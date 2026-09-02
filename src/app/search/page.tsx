@@ -46,10 +46,14 @@ export default async function SearchPage({
             </p>
           )}
 
-          {(outcome.mode === "exact" || outcome.mode === "semantic") && (
+          {(outcome.mode === "exact" || outcome.mode === "semantic" || outcome.mode === "topic") && (
             <div>
               <p className="mb-3 text-sm text-slate-500">
-                {outcome.mode === "exact" ? "Exact match" : `Results for "${query}"`}
+                {outcome.mode === "exact"
+                  ? "Exact match"
+                  : outcome.mode === "topic"
+                    ? `Verses about ${outcome.topicLabel}`
+                    : `Results for "${query}"`}
               </p>
               <ul className="space-y-3">
                 {outcome.results.map((r) => (

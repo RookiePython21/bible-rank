@@ -228,6 +228,7 @@ export function HeroBidBox({ topTotalCents }: Props) {
           <Link
             key={topic}
             href={`/search?q=${encodeURIComponent(topic.toLowerCase())}`}
+            onClick={() => track("verse_search", { search_query: topic.toLowerCase() })}
             className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:border-indigo-400 hover:text-indigo-600"
           >
             {topic}

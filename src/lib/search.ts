@@ -2,11 +2,13 @@ import "server-only";
 import { parseReference } from "./reference-parser";
 import { getVerseByReference, getVerseRank, semanticSearch } from "./verses";
 import { embedText } from "./embeddings";
+import { getTopicByQuery } from "./topics";
 import { toVerseDTO, type VerseDTO } from "@/types/db";
 
 export type SearchOutcome =
   | { mode: "exact"; results: VerseDTO[] }
   | { mode: "invalid_reference"; results: [] }
+  | { mode: "topic"; results: VerseDTO[]; topicLabel: string }
   | { mode: "semantic"; results: VerseDTO[] }
   | { mode: "no_confidence"; results: [] };
 
@@ -23,6 +25,20 @@ export async function performSearch(rawQuery: string): Promise<SearchOutcome> {
     }
     const rank = await getVerseRank(row.id);
     return { mode: "exact", results: [toVerseDTO(row, rank)] };
+  }
+
+  const topic = getTopicByQuery(query);
+  if (topic) {
+    const rows = await Promise.all(
+      topic.refs.map((r) => getVerseByReference(r.bookSlug, r.chapter, r.verse))
+    );
+    const found = rows.filter((row): row is NonNullable<typeof row> => row !== null);
+    if (found.length > 0) {
+      const results = await Promise.all(
+        found.map(async (row) => toVerseDTO(row, await getVerseRank(row.id)))
+      );
+      return { mode: "topic", results, topicLabel: topic.label };
+    }
   }
 
   const embedding = await embedText(query);
