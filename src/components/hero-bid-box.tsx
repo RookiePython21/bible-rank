@@ -7,7 +7,6 @@ import { BIBLE_BOOKS, BOOK_SECTIONS } from "@/lib/bible-books";
 import {
   formatUSD,
   MIN_CONTRIBUTION_CENTS,
-  TAKE_FIRST_MARGIN_CENTS,
   requiredToTakeFirstCents,
 } from "@/lib/money";
 import { track } from "@/lib/analytics";
@@ -21,9 +20,8 @@ export function HeroBidBox({ topVerse }: Props) {
   const router = useRouter();
   const topTotalCents = topVerse?.total_contributed_cents ?? 0;
   const minDollars = Math.ceil(MIN_CONTRIBUTION_CENTS / 100);
-  const [amountDollars, setAmountDollars] = useState(
-    Math.max(minDollars, Math.round((topTotalCents + TAKE_FIRST_MARGIN_CENTS) / 100))
-  );
+  const defaultDollars = Math.max(minDollars, 5);
+  const [amountDollars, setAmountDollars] = useState(defaultDollars);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -77,12 +75,7 @@ export function HeroBidBox({ topVerse }: Props) {
       setPicked(dto);
       if (dto) {
         track("verse_selected", { book_slug: bookSlug, chapter, verse: newVerse });
-        setAmountDollars(
-          Math.max(
-            minDollars,
-            Math.round(requiredToTakeFirstCents(topTotalCents, dto.totalContributedCents) / 100)
-          )
-        );
+        setAmountDollars(defaultDollars);
       }
     } finally {
       setPickLoading(false);
@@ -94,6 +87,13 @@ export function HeroBidBox({ topVerse }: Props) {
     router.push(`/checkout/${picked.bookSlug}-${picked.chapter}-${picked.verse}?amount=${amountDollars}`);
   }
 
+  function makeFirstPicked() {
+    if (!picked) return;
+    router.push(
+      `/checkout/${picked.bookSlug}-${picked.chapter}-${picked.verse}?amount=${takeFirstDollars}`
+    );
+  }
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     const q = query.trim();
@@ -102,6 +102,14 @@ export function HeroBidBox({ topVerse }: Props) {
     track("verse_search", { search_query: q });
     router.push(`/search?q=${encodeURIComponent(q)}`);
   }
+
+  const takeFirstDollars = picked
+    ? Math.max(
+        minDollars,
+        Math.round(requiredToTakeFirstCents(topTotalCents, picked.totalContributedCents) / 100)
+      )
+    : minDollars;
+  const pickedIsFirst = picked?.rank === 1;
 
   return (
     <div className="text-center">
@@ -196,8 +204,20 @@ export function HeroBidBox({ topVerse }: Props) {
                 >
                   −
                 </button>
-                <span className="min-w-[4.5rem] text-center text-sm font-semibold text-amber-700">
-                  {formatUSD(amountDollars * 100)}
+                <span className="flex min-w-[4.5rem] items-center justify-center text-sm font-semibold text-amber-700">
+                  <span aria-hidden>$</span>
+                  <input
+                    type="number"
+                    min={minDollars}
+                    step={1}
+                    value={amountDollars}
+                    onChange={(e) => {
+                      const n = parseInt(e.target.value, 10);
+                      setAmountDollars(Number.isFinite(n) ? Math.max(minDollars, n) : minDollars);
+                    }}
+                    aria-label="Amount to boost"
+                    className="w-12 bg-transparent text-center outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
                 </span>
                 <button
                   type="button"
@@ -214,6 +234,13 @@ export function HeroBidBox({ topVerse }: Props) {
                 className="rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600"
               >
                 <span aria-hidden>⚡</span> Boost Verse
+              </button>
+              <button
+                type="button"
+                onClick={makeFirstPicked}
+                className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+              >
+                {pickedIsFirst ? `Extend Lead ${formatUSD(takeFirstDollars * 100)}` : `Make #1 for ${formatUSD(takeFirstDollars * 100)}`}
               </button>
             </div>
           </div>

@@ -132,14 +132,14 @@ export async function GET(req: Request) {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: 24, marginTop: 48 }}>
-          {variant === "open" ? (
-            <>
-              <VerseCard reference={duel.verseA.reference} text={duel.verseA.text} />
-              <VerseCard reference={duel.verseB.reference} text={duel.verseB.text} />
-            </>
-          ) : (
-            <VerseCard reference={focusVerse!.reference} text={focusVerse!.text} highlighted={isResonantSide} />
-          )}
+          {variant === "open"
+            ? [
+                <VerseCard key="a" reference={duel.verseA.reference} text={duel.verseA.text} />,
+                <VerseCard key="b" reference={duel.verseB.reference} text={duel.verseB.text} />,
+              ]
+            : (
+                <VerseCard reference={focusVerse!.reference} text={focusVerse!.text} highlighted={isResonantSide} />
+              )}
         </div>
 
         <div style={{ display: "flex", flexGrow: 1 }} />
