@@ -1,0 +1,106 @@
+BIBLE KEYWORD RESEARCH — AHREFS
+================================================================================
+Source:   Ahrefs Keywords Explorer (API v3)
+Seeds:    "bible study", "bible verses", "bible passages"
+Country:  United States (us)
+Methods:  Matching Terms (phrase match) + Related Terms
+Filter:   US search volume between 100 and 500/mo
+Date:     2026-09-03
+
+SEED BENCHMARKS
+--------------------------------------------------------------------------------
+  bible verses .......... 314,000 /mo (US)
+  bible study ............ 33,000 /mo (US)  |  KD 53
+  bible passages ......... small cluster; far less competitive phrasing
+
+================================================================================
+TOP 32 KEYWORDS (100-500 US VOLUME)
+================================================================================
+
+--------------------------------------------------------------------------------
+CLUSTER 1: TOPICAL VERSE LISTS
+Natural fit for /categories and /verse pages.
+--------------------------------------------------------------------------------
+  #   Keyword                                    US Vol   Global   CPC
+  --  -----------------------------------------  ------   ------   -----
+   1  bible verses about mercy                      500    1,100   $0.01
+   2  bible verses about respect                    500    1,000   $0.01
+   3  bible verses about creation and nature        500      900   $0.01
+   4  bible verses about integrity                  500      800   $0.02
+   5  bible verses about honesty                    500      800   $0.01
+   6  bible verses on pride                         500      800   $0.01
+   7  bible verses about generosity                 500      700   $0.02
+   8  bible verses about contentment                500      700   $0.01
+   9  bible verses about stewardship                500      700   $0.02
+  10  bible verses about suffering                  500      700   $0.02
+  11  bible verses about angels                     500      700   $0.01
+  12  bible verses about letting go                 500      700   $0.02
+  13  bible verses about god's plan                 500      700   $0.01
+  14  bible verses about god's protection           500      700   $0.01
+  15  bible verses about being humble               500      700   $0.01
+  16  bible verses for mental health                500      700   $0.01
+  17  temptation bible verses                       500      700   $0.01
+  18  bible verses about the future                 500      700   $0.02
+  19  bible verses about motherhood                 500      600   $0.01
+  20  bible verses about breakups                   500      600   $0.01
+
+--------------------------------------------------------------------------------
+CLUSTER 2: RANKING / DISCOVERY INTENT
+Maps directly onto the leaderboard and duel mechanics — the differentiator.
+--------------------------------------------------------------------------------
+  #   Keyword                                    US Vol   Global   CPC
+  --  -----------------------------------------  ------   ------   -----
+  21  powerful verses in the bible                  500    1,800   $0.02
+  22  bible memory verses                           500    1,100   $0.02
+  23  most popular bible verse                      500      900   $0.02
+  24  famous bible verse                            450    1,200   $0.02
+  25  unique bible verses                           450      900   $0.02
+  26  bible verse search                            450      700   $0.40
+  27  best psalm verses                             450      700   $0.02
+  28  hard bible verses                             450      600   $0.02
+
+--------------------------------------------------------------------------------
+CLUSTER 3: "BIBLE PASSAGES" PHRASING
+Smaller volume, but noticeably thinner competition than "verses" phrasing.
+--------------------------------------------------------------------------------
+  #   Keyword                                    US Vol   Global   CPC
+  --  -----------------------------------------  ------   ------   -----
+  29  bible passages about love                     500      800   $0.02
+  30  bible passages about marriage                 400      500   $0.01
+  31  bible passages about anxiety                  400      450   $0.02
+  32  bible passages about hope                     300      500   $0.01
+
+================================================================================
+NOTES & CAVEATS
+================================================================================
+
+KEYWORD DIFFICULTY IS MISSING
+  The Ahrefs `difficulty` column returns "internal server error" on this API
+  key. It was retried roughly a dozen ways — alone, batched, at tiny result
+  limits, with extended timeouts — and succeeded only twice out of many
+  attempts. Volume, CPC, and global volume are all reliable. Re-run the KD
+  pull later, or read it from the Ahrefs UI.
+
+THE 500 CEILING IS AN ARTIFACT
+  The "bible verses about X" pattern has well over 100 terms sitting at
+  exactly 500/mo. The 20 in Cluster 1 are a relevance-based selection, not an
+  exhaustive top-20. A long tail is available for a larger content plan.
+
+FILTERED OUT DELIBERATELY
+  - Typo / branded noise: "bibke gateway", "cru giving", "bib;e",
+    "christnotes", "bibble verse", "bible veres"
+  - Product-mismatched downloadables: "free bible study lessons for adults
+    pdf", "bible study workbooks", "free printable ladies bible study lessons"
+
+THE "BIBLE STUDY" SEED
+  At this volume band it skews heavily toward downloadable curriculum and
+  small-group logistics, so it was drawn from only lightly. Best fits if that
+  angle is wanted later:
+    what is a bible study ................ 450 /mo
+    bible study guide for beginners ...... 450 /mo
+    how to do a bible study .............. 500 /mo
+
+CPC
+  Near-zero across the whole set ($0.01-$0.02) — expected for purely
+  informational intent with minimal advertiser competition. "bible verse
+  search" ($0.40) is the one outlier, reflecting Bible-app advertisers.
