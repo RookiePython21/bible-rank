@@ -14,6 +14,7 @@ type Props = {
   initialAmountDollars?: number;
   interpretationBody?: string;
   interpretationAuthorName?: string;
+  submitLabel?: string;
 };
 
 export function ContributeWidget({
@@ -24,6 +25,7 @@ export function ContributeWidget({
   initialAmountDollars,
   interpretationBody,
   interpretationAuthorName,
+  submitLabel = "Continue to Payment",
 }: Props) {
   const [amount, setAmount] = useState<number | "">(initialAmountDollars ?? 10);
   const [customValue, setCustomValue] = useState("");
@@ -142,7 +144,7 @@ export function ContributeWidget({
         onClick={() => startCheckout(Number(amount))}
         className="mt-4 w-full rounded-full bg-indigo-600 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
       >
-        {loading ? "Starting checkout…" : "Continue to Payment"}
+        {loading ? "Starting checkout…" : submitLabel}
       </button>
 
       <p className="mt-3 text-center text-xs text-slate-400">

@@ -50,3 +50,6 @@ supabase/.branches
 .claude/scheduled_tasks.lock
 .claude/skills
 .agents/skills
+
+# markdown scratch/notes (already-tracked .md files are unaffected)
+*.md

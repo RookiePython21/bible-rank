@@ -49,6 +49,7 @@ export function CheckoutContributeSection({
           initialAmountDollars={initialAmountDollars}
           interpretationBody={unlocked ? undefined : draftBody}
           interpretationAuthorName={unlocked ? undefined : draftAuthorName}
+          submitLabel="Share your interpretation"
         />
       </div>
     </>
