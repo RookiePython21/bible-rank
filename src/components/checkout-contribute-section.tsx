@@ -8,6 +8,7 @@ type Props = {
   verseId: string;
   unlocked: boolean;
   currentTotalCents: number;
+  currentRank: number | null;
   takeFirstDollars: number;
   isCurrentlyFirst: boolean;
   initialAmountDollars?: number;
@@ -17,6 +18,7 @@ export function CheckoutContributeSection({
   verseId,
   unlocked,
   currentTotalCents,
+  currentRank,
   takeFirstDollars,
   isCurrentlyFirst,
   initialAmountDollars,
@@ -44,6 +46,7 @@ export function CheckoutContributeSection({
         <ContributeWidget
           verseId={verseId}
           currentTotalCents={currentTotalCents}
+          currentRank={currentRank}
           takeFirstDollars={takeFirstDollars}
           isCurrentlyFirst={isCurrentlyFirst}
           initialAmountDollars={initialAmountDollars}

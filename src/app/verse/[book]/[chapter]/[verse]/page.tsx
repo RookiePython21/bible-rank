@@ -123,6 +123,7 @@ export default async function VersePage({
         <ContributeWidget
           verseId={row.id}
           currentTotalCents={row.total_contributed_cents}
+          currentRank={rank}
           takeFirstDollars={Math.round(centsToDollars(takeFirstCents))}
           isCurrentlyFirst={isFirst}
         />

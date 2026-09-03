@@ -208,6 +208,16 @@ export async function getVerseRank(verseId: string): Promise<number | null> {
   return (data as number | null) ?? null;
 }
 
+/** Rank a verse would have if its total were `totalCents` — powers the pre-payment rank preview. */
+export async function getRankForTotal(verseId: string, totalCents: number): Promise<number | null> {
+  const { data, error } = await supabaseServer().rpc("get_rank_for_total", {
+    p_verse_id: verseId,
+    p_total_cents: totalCents,
+  });
+  if (error) throw new Error(error.message);
+  return (data as number | null) ?? null;
+}
+
 export async function getVerseByReference(
   bookSlug: string,
   chapter: number,

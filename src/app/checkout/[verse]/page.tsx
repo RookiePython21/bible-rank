@@ -70,6 +70,7 @@ export default async function CheckoutPage({
         verseId={row.id}
         unlocked={unlocked}
         currentTotalCents={row.total_contributed_cents}
+        currentRank={rank}
         takeFirstDollars={Math.round(centsToDollars(takeFirstCents))}
         isCurrentlyFirst={isFirst}
         initialAmountDollars={initialAmountDollars}

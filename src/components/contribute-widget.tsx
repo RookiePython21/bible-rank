@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatUSD } from "@/lib/money";
 import { track } from "@/lib/analytics";
 
@@ -9,6 +9,7 @@ const QUICK_AMOUNTS = [1, 5, 10, 25, 50];
 type Props = {
   verseId: string;
   currentTotalCents: number;
+  currentRank?: number | null;
   takeFirstDollars: number;
   isCurrentlyFirst: boolean;
   initialAmountDollars?: number;
@@ -20,6 +21,7 @@ type Props = {
 export function ContributeWidget({
   verseId,
   currentTotalCents,
+  currentRank,
   takeFirstDollars,
   isCurrentlyFirst,
   initialAmountDollars,
@@ -31,8 +33,34 @@ export function ContributeWidget({
   const [customValue, setCustomValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [projectedRank, setProjectedRank] = useState<number | null | undefined>(undefined);
 
   const projectedCents = currentTotalCents + (typeof amount === "number" ? amount * 100 : 0);
+
+  useEffect(() => {
+    if (!(typeof amount === "number" && amount >= 1)) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/verses/${verseId}/projected-rank?cents=${projectedCents}`
+        );
+        if (cancelled) return;
+        if (!res.ok) {
+          setProjectedRank(undefined);
+          return;
+        }
+        const data = await res.json();
+        if (!cancelled) setProjectedRank(data.rank ?? null);
+      } catch {
+        if (!cancelled) setProjectedRank(undefined);
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [verseId, projectedCents, amount]);
 
   async function startCheckout(dollars: number) {
     if (!Number.isInteger(dollars) || dollars < 1) {
@@ -133,6 +161,20 @@ export function ContributeWidget({
         <div className="flex justify-between font-semibold text-slate-900">
           <span>Projected total</span>
           <span>{formatUSD(projectedCents)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Rank change</span>
+          <span className="font-medium text-slate-900">
+            {currentRank ? `#${currentRank}` : "Unranked"}
+            {" → "}
+            {typeof amount !== "number" || amount < 1
+              ? "—"
+              : projectedRank === undefined
+                ? "…"
+                : projectedRank
+                  ? `#${projectedRank}`
+                  : "Unranked"}
+          </span>
         </div>
       </div>
 
