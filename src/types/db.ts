@@ -9,6 +9,8 @@ export type VerseRow = {
   verse_text: string;
   translation: string;
   total_contributed_cents: number;
+  /** Non-payment adjustment folded into total_contributed_cents (migration 0013). */
+  total_adjustment_cents: number;
   rank_tiebreak_at: string;
   created_at: string;
 };

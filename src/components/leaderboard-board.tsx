@@ -17,6 +17,7 @@ export type NormalizedLeaderboardRow = {
   interpretationCount: number;
   lastContributionAt: string;
   claimPriceCents: number;
+  bidCents: number;
   sectionLabel?: string;
   sectionIcon?: string;
 };
@@ -89,6 +90,7 @@ export function LeaderboardBoard({
                 interpretationCount={row.interpretationCount}
                 lastContributionAt={row.lastContributionAt}
                 claimPriceCents={row.claimPriceCents}
+                bidCents={row.bidCents}
                 sectionLabel={row.sectionLabel}
                 sectionIcon={row.sectionIcon}
                 variant="top3"
@@ -115,6 +117,7 @@ export function LeaderboardBoard({
                     interpretationCount={row.interpretationCount}
                     lastContributionAt={row.lastContributionAt}
                     claimPriceCents={row.claimPriceCents}
+                    bidCents={row.bidCents}
                     sectionLabel={row.sectionLabel}
                     sectionIcon={row.sectionIcon}
                     variant="standard"

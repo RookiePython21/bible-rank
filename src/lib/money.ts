@@ -45,3 +45,40 @@ export function claimPriceCents(row: { rank: number; total_contributed_cents: nu
   const margin = row.rank === 1 ? TAKE_FIRST_MARGIN_CENTS : CLAIM_OTHER_RANK_MARGIN_CENTS;
   return row.total_contributed_cents + margin;
 }
+
+/**
+ * Homepage leaderboard bid ceilings, highest rank first. The board's claim
+ * price tracks each row's own total, which put the top of the all-time board
+ * out of reach as a first contribution ("claim this rank for $205"). The
+ * homepage caps the bid it asks for by rank instead — #1 never costs more
+ * than $9 — while the verse and checkout pages still show the true amount
+ * required to take a rank.
+ */
+export const TOP_RANK_BID_CEILING_CENTS = 900;
+
+const BID_CEILINGS_CENTS: readonly { maxRank: number; ceilingCents: number }[] = [
+  { maxRank: 1, ceilingCents: TOP_RANK_BID_CEILING_CENTS },
+  { maxRank: 3, ceilingCents: 700 },
+  { maxRank: 10, ceilingCents: 500 },
+];
+
+const LOWER_RANK_BID_CEILING_CENTS = 300;
+
+export function bidCeilingCents(rank: number): number {
+  return (
+    BID_CEILINGS_CENTS.find((tier) => rank <= tier.maxRank)?.ceilingCents ??
+    LOWER_RANK_BID_CEILING_CENTS
+  );
+}
+
+/**
+ * Bid shown on the homepage leaderboard: the row's claim price, capped by the
+ * ceiling for its rank. Both inputs fall with rank, so the ladder never asks
+ * more for a lower-ranked row than for a higher one.
+ */
+export function leaderboardBidCents(row: { rank: number; total_contributed_cents: number }): number {
+  return Math.max(
+    MIN_CONTRIBUTION_CENTS,
+    Math.min(claimPriceCents(row), bidCeilingCents(row.rank))
+  );
+}

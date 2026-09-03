@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getLeaderboardPage, getLeaderboardTodayPage, getTopVerse, getTopicLeaderboard } from "@/lib/verses";
 import { getCurrentDuel } from "@/lib/duels";
 import { bookSlugsForSection, SECTION_BY_BOOK_SLUG } from "@/lib/bible-books";
-import { claimPriceCents, formatUSD } from "@/lib/money";
+import { claimPriceCents, formatUSD, leaderboardBidCents } from "@/lib/money";
 import type { LeaderboardRow, TodayLeaderboardRow } from "@/types/db";
 import { StatsBar } from "@/components/stats-bar";
 import { HeroBidBox } from "@/components/hero-bid-box";
@@ -28,6 +28,7 @@ function normalizeAllTime(row: LeaderboardRow): NormalizedLeaderboardRow {
     interpretationCount: row.interpretation_count,
     lastContributionAt: row.last_contribution_at,
     claimPriceCents: claimPriceCents(row),
+    bidCents: leaderboardBidCents(row),
     sectionLabel: section?.label,
     sectionIcon: section?.icon,
   };
@@ -48,6 +49,7 @@ function normalizeToday(row: TodayLeaderboardRow): NormalizedLeaderboardRow {
     interpretationCount: row.interpretation_count,
     lastContributionAt: row.last_contribution_at,
     claimPriceCents: claimPriceCents({ rank: row.rank, total_contributed_cents: row.today_total_cents }),
+    bidCents: leaderboardBidCents({ rank: row.rank, total_contributed_cents: row.today_total_cents }),
     sectionLabel: section?.label,
     sectionIcon: section?.icon,
   };

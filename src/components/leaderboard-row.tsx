@@ -18,6 +18,7 @@ type Props = {
   interpretationCount: number;
   lastContributionAt: string;
   claimPriceCents: number;
+  bidCents: number;
   sectionLabel?: string;
   sectionIcon?: string;
   variant: "top3" | "standard";
@@ -36,11 +37,18 @@ export function LeaderboardRow({
   interpretationCount,
   lastContributionAt,
   claimPriceCents,
+  bidCents,
   sectionLabel,
   sectionIcon,
   variant,
 }: Props) {
-  const claimHref = `/checkout/${bookSlug}-${chapter}-${verse}?amount=${Math.round(claimPriceCents / 100)}`;
+  const bidHref = `/checkout/${bookSlug}-${chapter}-${verse}?amount=${Math.round(bidCents / 100)}`;
+  // Below the rank's ceiling the bid no longer buys the rank outright, so the
+  // CTA drops the "claim this rank" promise — checkout shows the real price.
+  const bidLabel =
+    bidCents >= claimPriceCents
+      ? `claim this rank for ${formatUSD(bidCents)}`
+      : `boost this verse for ${formatUSD(bidCents)}`;
 
   function handleRowClick() {
     track("leaderboard_row_click", { verse_id: verseId });
@@ -77,17 +85,17 @@ export function LeaderboardRow({
     return (
       <div className="group relative mb-3 rounded-2xl border-2 border-amber-300 bg-amber-50/60 p-4 sm:p-5">
         <Link
-          href={claimHref}
+          href={bidHref}
           onClick={handleRowClick}
           className="absolute inset-0 z-10 rounded-2xl"
           aria-label={reference}
         />
 
         <Link
-          href={claimHref}
+          href={bidHref}
           className="pointer-events-none absolute -top-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold whitespace-nowrap text-white opacity-0 shadow-md transition group-hover:pointer-events-auto group-hover:opacity-100"
         >
-          claim this rank for {formatUSD(claimPriceCents)}
+          {bidLabel}
         </Link>
 
         <div className="relative z-0 flex items-center gap-4">
@@ -112,13 +120,13 @@ export function LeaderboardRow({
 
   return (
     <div className="group relative border-b border-slate-100 py-4 last:border-0">
-      <Link href={claimHref} onClick={handleRowClick} className="absolute inset-0 z-10" aria-label={reference} />
+      <Link href={bidHref} onClick={handleRowClick} className="absolute inset-0 z-10" aria-label={reference} />
 
       <Link
-        href={claimHref}
+        href={bidHref}
         className="pointer-events-none absolute -top-3 left-16 z-20 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold whitespace-nowrap text-white opacity-0 shadow-md transition group-hover:pointer-events-auto group-hover:opacity-100"
       >
-        claim this rank for {formatUSD(claimPriceCents)}
+        {bidLabel}
       </Link>
 
       <div className="relative z-0 flex items-center gap-4">
