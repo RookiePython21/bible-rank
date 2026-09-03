@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getVerseByReference,
@@ -12,7 +13,7 @@ import { formatUSD, requiredToTakeFirstCents, centsToDollars } from "@/lib/money
 import { ContributeWidget } from "@/components/contribute-widget";
 import { ShareControls } from "@/components/share-controls";
 import { VerseViewTracker } from "@/components/verse-view-tracker";
-import { DuelWidget } from "@/components/duel-widget";
+import { InterpretationsList } from "@/components/interpretations-list";
 import { reference } from "@/types/db";
 
 type Params = { book: string; chapter: string; verse: string };
@@ -107,8 +108,14 @@ export default async function VersePage({
 
       {isInCurrentDuel && (
         <div className="mt-8">
-          <h2 className="mb-3 text-sm font-semibold text-slate-900">This verse is in this week&apos;s Verse Duel</h2>
-          <DuelWidget duel={duel!} />
+          <Link
+            href="/duel"
+            className={`flex items-center justify-center rounded-full border border-indigo-300 bg-indigo-50 px-5 py-3 text-sm font-semibold text-indigo-700 transition hover:border-indigo-400 ${
+              duel!.status === "resolved" ? "" : "animate-duel-pulse"
+            }`}
+          >
+            {duel!.status === "resolved" ? "See this week's Duel result" : "Duel in process"}
+          </Link>
         </div>
       )}
 
@@ -135,30 +142,7 @@ export default async function VersePage({
         </div>
       )}
 
-      <div id="interpretations" className="mt-10">
-        <h2 className="text-sm font-semibold text-slate-900">Interpretations</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          What this verse means to people who&apos;ve read it.
-        </p>
-
-        {interpretations.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-400">
-            Be the first to share what this verse means to you.
-          </p>
-        ) : (
-          <ul className="mt-4 space-y-4">
-            {interpretations.map((it) => (
-              <li key={it.id} className="rounded-xl border border-slate-200 p-4">
-                <p className="text-sm leading-relaxed text-slate-700">{it.body}</p>
-                <p className="mt-2 text-xs text-slate-400">
-                  — {it.author_name?.trim() || "Anonymous"} ·{" "}
-                  {new Date(it.created_at).toLocaleDateString()}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <InterpretationsList interpretations={interpretations} />
 
       <div className="mt-10">
         <h2 className="mb-3 text-sm font-semibold text-slate-900">Share</h2>

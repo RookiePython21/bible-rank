@@ -40,7 +40,6 @@ export function LeaderboardRow({
   sectionIcon,
   variant,
 }: Props) {
-  const href = `/verse/${bookSlug}/${chapter}/${verse}`;
   const claimHref = `/checkout/${bookSlug}-${chapter}-${verse}?amount=${Math.round(claimPriceCents / 100)}`;
 
   function handleRowClick() {
@@ -78,7 +77,7 @@ export function LeaderboardRow({
     return (
       <div className="group relative mb-3 rounded-2xl border-2 border-amber-300 bg-amber-50/60 p-4 sm:p-5">
         <Link
-          href={href}
+          href={claimHref}
           onClick={handleRowClick}
           className="absolute inset-0 z-10 rounded-2xl"
           aria-label={reference}
@@ -113,7 +112,7 @@ export function LeaderboardRow({
 
   return (
     <div className="group relative border-b border-slate-100 py-4 last:border-0">
-      <Link href={href} onClick={handleRowClick} className="absolute inset-0 z-10" aria-label={reference} />
+      <Link href={claimHref} onClick={handleRowClick} className="absolute inset-0 z-10" aria-label={reference} />
 
       <Link
         href={claimHref}

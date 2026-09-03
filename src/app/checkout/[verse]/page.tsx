@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { parseVerseSlug } from "@/lib/verse-slug";
 import { getVerseByReference, getVerseRank, getTopTotalCents } from "@/lib/verses";
 import { hasUnlockedInterpretation } from "@/lib/interpretation-unlock";
+import { getInterpretationsForVerse } from "@/lib/interpretations";
 import { formatUSD, requiredToTakeFirstCents, centsToDollars } from "@/lib/money";
 import { CheckoutContributeSection } from "@/components/checkout-contribute-section";
+import { InterpretationsList } from "@/components/interpretations-list";
 import { reference } from "@/types/db";
 
 export const metadata: Metadata = {
@@ -31,10 +33,11 @@ export default async function CheckoutPage({
   const row = await getVerseByReference(parsed.bookSlug, parsed.chapter, parsed.verse);
   if (!row) notFound();
 
-  const [rank, topTotalCents, unlocked] = await Promise.all([
+  const [rank, topTotalCents, unlocked, interpretations] = await Promise.all([
     getVerseRank(row.id),
     getTopTotalCents(),
     hasUnlockedInterpretation(row.id),
+    getInterpretationsForVerse(row.id, 20),
   ]);
 
   const ref = reference(row);
@@ -71,6 +74,8 @@ export default async function CheckoutPage({
         isCurrentlyFirst={isFirst}
         initialAmountDollars={initialAmountDollars}
       />
+
+      <InterpretationsList interpretations={interpretations} />
     </div>
   );
 }
