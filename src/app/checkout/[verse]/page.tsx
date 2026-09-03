@@ -4,8 +4,7 @@ import { parseVerseSlug } from "@/lib/verse-slug";
 import { getVerseByReference, getVerseRank, getTopTotalCents } from "@/lib/verses";
 import { hasUnlockedInterpretation } from "@/lib/interpretation-unlock";
 import { formatUSD, requiredToTakeFirstCents, centsToDollars } from "@/lib/money";
-import { ContributeWidget } from "@/components/contribute-widget";
-import { InterpretationForm } from "@/components/interpretation-form";
+import { CheckoutContributeSection } from "@/components/checkout-contribute-section";
 import { reference } from "@/types/db";
 
 export const metadata: Metadata = {
@@ -64,22 +63,14 @@ export default async function CheckoutPage({
         )}
       </div>
 
-      <div className="mt-6">
-        <h2 className="text-sm font-semibold text-slate-900">
-          What do you want to share with others about this post?
-        </h2>
-        <InterpretationForm verseId={row.id} unlocked={unlocked} />
-      </div>
-
-      <div id="contribute" className="mt-6">
-        <ContributeWidget
-          verseId={row.id}
-          currentTotalCents={row.total_contributed_cents}
-          takeFirstDollars={Math.round(centsToDollars(takeFirstCents))}
-          isCurrentlyFirst={isFirst}
-          initialAmountDollars={initialAmountDollars}
-        />
-      </div>
+      <CheckoutContributeSection
+        verseId={row.id}
+        unlocked={unlocked}
+        currentTotalCents={row.total_contributed_cents}
+        takeFirstDollars={Math.round(centsToDollars(takeFirstCents))}
+        isCurrentlyFirst={isFirst}
+        initialAmountDollars={initialAmountDollars}
+      />
     </div>
   );
 }

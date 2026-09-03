@@ -9,7 +9,18 @@ import { isRateLimited, clientIp } from "@/lib/rate-limit";
 const bodySchema = z.object({
   verseId: z.string().uuid(),
   amountDollars: z.number().int().positive(),
+  interpretationBody: z.string().trim().max(500).optional(),
+  authorName: z.string().trim().max(80).optional(),
 });
+
+function stripControlChars(value: string): string {
+  return Array.from(value)
+    .filter((ch) => {
+      const code = ch.charCodeAt(0);
+      return code > 0x1f && code !== 0x7f;
+    })
+    .join("");
+}
 
 export async function POST(req: Request) {
   if (isRateLimited(`checkout:${clientIp(req)}`, 20, 60_000)) {
@@ -30,6 +41,12 @@ export async function POST(req: Request) {
 
   const { verseId, amountDollars } = parsed.data;
   const amountCents = dollarsToCents(amountDollars);
+  const interpretationBody = parsed.data.interpretationBody
+    ? stripControlChars(parsed.data.interpretationBody)
+    : "";
+  const interpretationAuthorName = parsed.data.authorName
+    ? stripControlChars(parsed.data.authorName)
+    : "";
 
   if (amountCents < MIN_CONTRIBUTION_CENTS) {
     return NextResponse.json(
@@ -67,6 +84,8 @@ export async function POST(req: Request) {
         verse_id: verse.id,
         canonical_key: verse.canonical_key,
         amount_cents: String(amountCents),
+        interpretation_body: interpretationBody,
+        interpretation_author_name: interpretationAuthorName,
       },
       success_url: `${siteUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/verse/${verse.book_slug}/${verse.chapter_number}/${verse.verse_number}?canceled=1`,

@@ -4,14 +4,22 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@/lib/analytics";
 
-type Props = { verseId: string; unlocked: boolean };
+type Props = {
+  verseId: string;
+  unlocked: boolean;
+  onDraftChange?: (body: string, authorName: string) => void;
+};
 
-export function InterpretationForm({ verseId, unlocked }: Props) {
+const DRAFT_BODY_MAX = 500;
+
+export function InterpretationForm({ verseId, unlocked, onDraftChange }: Props) {
   const router = useRouter();
   const [authorName, setAuthorName] = useState("");
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [draftBody, setDraftBody] = useState("");
+  const [draftAuthorName, setDraftAuthorName] = useState("");
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -49,11 +57,34 @@ export function InterpretationForm({ verseId, unlocked }: Props) {
 
   if (!unlocked) {
     return (
-      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-        Contribute to show your interpretation.{" "}
-        <a href="#contribute" className="font-medium text-indigo-600 hover:text-indigo-700">
-          Contribute now
-        </a>
+      <div className="mt-4 space-y-2">
+        <textarea
+          value={draftBody}
+          onChange={(e) => {
+            const next = e.target.value;
+            setDraftBody(next);
+            onDraftChange?.(next, draftAuthorName);
+          }}
+          maxLength={DRAFT_BODY_MAX}
+          rows={3}
+          placeholder="What does this verse mean to you?"
+          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm shadow-sm focus:border-indigo-500"
+        />
+        <input
+          value={draftAuthorName}
+          onChange={(e) => {
+            const next = e.target.value;
+            setDraftAuthorName(next);
+            onDraftChange?.(draftBody, next);
+          }}
+          maxLength={80}
+          type="text"
+          placeholder="Your name (optional)"
+          className="w-full rounded-full border border-slate-300 px-4 py-2 text-sm shadow-sm focus:border-indigo-500 sm:max-w-xs"
+        />
+        <p className="text-xs text-slate-500">
+          We&apos;ll share this once your contribution below goes through.
+        </p>
       </div>
     );
   }

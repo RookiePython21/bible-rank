@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripeClient } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { createInterpretation } from "@/lib/interpretations";
 
 // Stripe webhooks need the raw request body for signature verification.
 export const runtime = "nodejs";
@@ -133,6 +134,21 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
   });
 
   if (error) throw new Error(error.message);
+
+  // Best-effort: an interpretation submitted alongside the payment is a nice-to-have,
+  // not the financial record — never let a failure here trigger a webhook retry.
+  const interpretationBody = session.metadata?.interpretation_body?.trim();
+  if (interpretationBody) {
+    try {
+      await createInterpretation({
+        verseId,
+        authorName: session.metadata?.interpretation_author_name?.trim() || null,
+        body: interpretationBody,
+      });
+    } catch (err) {
+      console.error("failed to create interpretation from checkout metadata", session.id, err);
+    }
+  }
 }
 
 async function handleDuelBackingCompleted(event: Stripe.Event) {

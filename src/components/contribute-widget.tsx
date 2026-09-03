@@ -12,6 +12,8 @@ type Props = {
   takeFirstDollars: number;
   isCurrentlyFirst: boolean;
   initialAmountDollars?: number;
+  interpretationBody?: string;
+  interpretationAuthorName?: string;
 };
 
 export function ContributeWidget({
@@ -20,6 +22,8 @@ export function ContributeWidget({
   takeFirstDollars,
   isCurrentlyFirst,
   initialAmountDollars,
+  interpretationBody,
+  interpretationAuthorName,
 }: Props) {
   const [amount, setAmount] = useState<number | "">(initialAmountDollars ?? 10);
   const [customValue, setCustomValue] = useState("");
@@ -40,7 +44,12 @@ export function ContributeWidget({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ verseId, amountDollars: dollars }),
+        body: JSON.stringify({
+          verseId,
+          amountDollars: dollars,
+          interpretationBody: interpretationBody?.trim() || undefined,
+          authorName: interpretationAuthorName?.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
